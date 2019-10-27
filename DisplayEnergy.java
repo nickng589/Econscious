@@ -10,6 +10,7 @@ import android.content.Intent;
 import android.os.Build;
 import android.os.IBinder;
 import android.util.Log;
+import java.lang.Math;
 
 import com.smartdevicelink.managers.CompletionListener;
 import com.smartdevicelink.managers.SdlManager;
@@ -62,7 +63,8 @@ public class DisplayEnergy {
                 if (onVehicleDataNotification.getExternalTemperature() != null ||onVehicleDataNotification.getExternalTemperature() != null) {
                     if (displayTemp == true) {
                         double celcius = onVehicleDataNotification.getExternalTemperature();
-                        if (celcius > targetTemp || speed > 55) {
+                        celcius = 13.12 + celcius*0.6215-Math.pow((speed/3.6),0.16)*11.37 +0.3965*celcius*Math.pow(speed/3.6,0.16);
+                        if (celcius > targetTemp || speed > 88.5) {
                             _sdl.getScreenManager().setTextField2("Use Air Conditioner");
                         } else {
                             _sdl.getScreenManager().setTextField2("Roll windows down");
@@ -187,6 +189,6 @@ public class DisplayEnergy {
     private boolean displaySpeed;
     private boolean displayTemp;
     private boolean displayFuel;
-    private double targetTemp = 70;
+    private double targetTemp = 24;
     private double speed;
 }
