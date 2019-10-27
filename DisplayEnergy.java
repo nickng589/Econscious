@@ -57,6 +57,7 @@ public class DisplayEnergy {
     public DisplayEnergy(SdlManager sdl){
         _sdl = sdl;
         first = true;
+        accelerationCount =0;
         _sdl.addOnRPCNotificationListener(FunctionID.ON_VEHICLE_DATA, new OnRPCNotificationListener() {
             @Override
             public void onNotified(RPCNotification notification) {
@@ -161,6 +162,39 @@ public class DisplayEnergy {
             }
         });
         _sdl.sendRPC(subscribeRequest);
+
+        _sdl.addOnRPCNotificationListener(FunctionID.ON_VEHICLE_DATA, new OnRPCNotificationListener() {
+            @Override
+            public void onNotified(RPCNotification notification) {
+                OnVehicleData onVehicleDataNotification = (OnVehicleData) notification;
+                if (onVehicleDataNotification.getAccPedalPosition() != null) {
+                    if (onVehicleDataNotification.getAccPedalPosition()>50) {
+                        accelerationCount+=1;
+                    }
+                    if (displayAcc){
+                        _sdl.getScreenManager().setTextField2((int)accelerationCount + " times accelerated too fast");
+                    }
+                }
+            }
+        });
+        subscribeRequest = new SubscribeVehicleData();
+        subscribeRequest.setAccPedalPosition(true);
+        subscribeRequest.setOnRPCResponseListener(new OnRPCResponseListener() {
+            @Override
+            public void onResponse(int correlationId, RPCResponse response) {
+                if(response.getSuccess()){
+                    Log.i("SdlService", "Successfully subscribed to vehicle data.");
+                }else{
+                    Log.i("SdlService", "Request to subscribe to vehicle data was rejected.");
+                }
+            }
+
+            @Override
+            public void onError(int correlationId, Result resultCode, String info){
+                Log.e("display", "onError: "+ resultCode+ " | Info: "+ info );
+            }
+        });
+        _sdl.sendRPC(subscribeRequest);
     }
 
     public void display(){
@@ -209,6 +243,13 @@ public class DisplayEnergy {
         displayFuel = true;
     }
 
+    public void display2(){
+        _sdl.getScreenManager().setTextField1("Acceleration info");
+        _sdl.getScreenManager().setTextField2("");
+        _sdl.getScreenManager().setTextField3("");
+        displayAcc = true;
+    }
+
     public void stop(){
         displayFuel = false;
         displayTemp = false;
@@ -224,4 +265,6 @@ public class DisplayEnergy {
     private boolean first;
     private double fuel;
     private double startingFuel;
+    private double accelerationCount;
+    private boolean displayAcc;
 }

@@ -57,10 +57,10 @@ public class SdlService extends Service {
 	private static final String APP_NAME 				= "Econscious";
 	private static final String APP_ID 					= "8678309";
 
-	private static final String ICON_FILENAME 			= "hello_sdl_icon.png";
+	private static final String ICON_FILENAME 			= "econscious.png";
 	private static final String SDL_IMAGE_FILENAME  	= "sdl_full_image.png";
 
-	private static final String WELCOME_SHOW 			= "Welcome to HelloSDL";
+	private static final String WELCOME_SHOW 			= "Click menu to start saving energy";
 	private static final String WELCOME_SPEAK 			= "Welcome to Hello S D L";
 
 	private static final String TEST_COMMAND_NAME 		= "Test Command";
@@ -247,7 +247,7 @@ public class SdlService extends Service {
 		// some voice commands
 		List<String> voice2 = Collections.singletonList("Cell two");
 
-		MenuCell mainCell1 = new MenuCell("AC recommendation", livio, null, new MenuSelectionListener() {
+		MenuCell mainCell1 = new MenuCell("AC Recommendation", null, null, new MenuSelectionListener() {
 			@Override
 			public void onTriggered(TriggerSource trigger) {
 				Log.i(TAG, "Test cell 1 triggered. Source: "+ trigger.toString());
@@ -256,7 +256,7 @@ public class SdlService extends Service {
 			}
 		});
 
-		MenuCell mainCell2 = new MenuCell("Test Cell 2", null, voice2, new MenuSelectionListener() {
+		MenuCell mainCell2 = new MenuCell("Fuel Consumption Summary", null, null, new MenuSelectionListener() {
 			@Override
 			public void onTriggered(TriggerSource trigger) {
 				Log.i(TAG, "Test cell 2 triggered. Source: "+ trigger.toString());
@@ -265,44 +265,17 @@ public class SdlService extends Service {
 			}
 		});
 
-		// SUB MENU
-
-		MenuCell subCell1 = new MenuCell("SubCell 1",null, null, new MenuSelectionListener() {
+		MenuCell mainCell3 = new MenuCell("Acceleration data", null, null, new MenuSelectionListener() {
 			@Override
 			public void onTriggered(TriggerSource trigger) {
-				Log.i(TAG, "Sub cell 1 triggered. Source: "+ trigger.toString());
-			}
-		});
-
-		MenuCell subCell2 = new MenuCell("SubCell 2",null, null, new MenuSelectionListener() {
-			@Override
-			public void onTriggered(TriggerSource trigger) {
-				Log.i(TAG, "Sub cell 2 triggered. Source: "+ trigger.toString());
-			}
-		});
-
-		// sub menu parent cell
-		MenuCell mainCell3 = new MenuCell("Test Cell 3 (sub menu)", null, Arrays.asList(subCell1,subCell2));
-
-		MenuCell mainCell4 = new MenuCell("Show Perform Interaction", null, null, new MenuSelectionListener() {
-			@Override
-			public void onTriggered(TriggerSource trigger) {
-				showPerformInteraction();
-			}
-		});
-
-		MenuCell mainCell5 = new MenuCell("Clear the menu",null, null, new MenuSelectionListener() {
-			@Override
-			public void onTriggered(TriggerSource trigger) {
-				Log.i(TAG, "Clearing Menu. Source: "+ trigger.toString());
-				// Clear this thing
-				sdlManager.getScreenManager().setMenu(Collections.<MenuCell>emptyList());
-				showAlert("Menu Cleared");
+				de.stop();
+				de.display2();
+				//showPerformInteraction();
 			}
 		});
 
 		// Send the entire menu off to be created
-		sdlManager.getScreenManager().setMenu(Arrays.asList(mainCell1, mainCell2, mainCell3, mainCell4, mainCell5));
+		sdlManager.getScreenManager().setMenu(Arrays.asList(mainCell1, mainCell2,  mainCell3));
 	}
 
 	/**
