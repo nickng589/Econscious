@@ -56,6 +56,7 @@ import java.util.Vector;
 public class DisplayEnergy {
     public DisplayEnergy(SdlManager sdl){
         _sdl = sdl;
+        first = true;
         _sdl.addOnRPCNotificationListener(FunctionID.ON_VEHICLE_DATA, new OnRPCNotificationListener() {
             @Override
             public void onNotified(RPCNotification notification) {
@@ -69,7 +70,7 @@ public class DisplayEnergy {
                         } else {
                             _sdl.getScreenManager().setTextField2("Roll windows down");
                         }
-                        _sdl.getScreenManager().setTextField3(speed + "");
+                        //_sdl.getScreenManager().setTextField3(speed + "");
                     }
                 }
             }
@@ -92,26 +93,15 @@ public class DisplayEnergy {
             }
         });
         _sdl.sendRPC(subscribeRequest);
+
         _sdl.addOnRPCNotificationListener(FunctionID.ON_VEHICLE_DATA, new OnRPCNotificationListener() {
             @Override
             public void onNotified(RPCNotification notification) {
                 OnVehicleData onVehicleDataNotification = (OnVehicleData) notification;
                 if (onVehicleDataNotification.getSpeed() != null) {
                     speed = onVehicleDataNotification.getSpeed();
-                    _sdl.getScreenManager().setTextField4(speed + "");
                     if (displaySpeed == true) {
                         _sdl.getScreenManager().setTextField2(speed + " KM/hr");
-                    }
-                    if(displayTemp ==true){
-                        _sdl.getScreenManager().setTextField4("???");
-                        double celcius = onVehicleDataNotification.getExternalTemperature();
-                        _sdl.getScreenManager().setTextField4(celcius +"");
-                        if (celcius > targetTemp || speed > 55) {
-                            _sdl.getScreenManager().setTextField2("Use Air Conditioner");
-                        } else {
-                            _sdl.getScreenManager().setTextField2("Roll windows down");
-                        }
-                        _sdl.getScreenManager().setTextField3(speed + "");
                     }
                 }
             }
@@ -134,17 +124,56 @@ public class DisplayEnergy {
             }
         });
         _sdl.sendRPC(subscribeRequest);
+
+        _sdl.addOnRPCNotificationListener(FunctionID.ON_VEHICLE_DATA, new OnRPCNotificationListener() {
+            @Override
+            public void onNotified(RPCNotification notification) {
+                OnVehicleData onVehicleDataNotification = (OnVehicleData) notification;
+                if (onVehicleDataNotification.getFuelLevel() != null) {
+                    fuel = onVehicleDataNotification.getFuelLevel();
+                    if(first){
+                        startingFuel = fuel;
+                    }
+                    if (displayFuel == true) {
+                        double fuelUsed = (startingFuel - fuel)/100*15;
+                        _sdl.getScreenManager().setTextField2(Double.toString(fuelUsed) + " gallons used");
+                        _sdl.getScreenManager().setTextField3(fuelUsed*8.887 + " kilograms of CO2 emitted");
+                        first = false;
+                    }
+                }
+            }
+        });
+        subscribeRequest = new SubscribeVehicleData();
+        subscribeRequest.setFuelLevel(true);
+        subscribeRequest.setOnRPCResponseListener(new OnRPCResponseListener() {
+            @Override
+            public void onResponse(int correlationId, RPCResponse response) {
+                if(response.getSuccess()){
+                    Log.i("SdlService", "Successfully subscribed to vehicle data.");
+                }else{
+                    Log.i("SdlService", "Request to subscribe to vehicle data was rejected.");
+                }
+            }
+
+            @Override
+            public void onError(int correlationId, Result resultCode, String info){
+                Log.e("display", "onError: "+ resultCode+ " | Info: "+ info );
+            }
+        });
+        _sdl.sendRPC(subscribeRequest);
     }
 
     public void display(){
+        _sdl.getScreenManager().setTextField3("");
         _sdl.getScreenManager().setTextField2("");
         _sdl.getScreenManager().setTextField1("Temp");
         displayTemp = true;
     }
 
     public void display1(){
+        _sdl.getScreenManager().setTextField3("");
         _sdl.getScreenManager().setTextField2("");
-        _sdl.getScreenManager().setTextField1("Speed");
+        _sdl.getScreenManager().setTextField1("Fuel Consumption");
         /*
         _sdl.addOnRPCNotificationListener(FunctionID.ON_VEHICLE_DATA, new OnRPCNotificationListener() {
             @Override
@@ -177,12 +206,13 @@ public class DisplayEnergy {
         });
         _sdl.sendRPC(subscribeRequest);
         */
-        displaySpeed = true;
+        displayFuel = true;
     }
 
     public void stop(){
-        displaySpeed = false;
+        displayFuel = false;
         displayTemp = false;
+        displaySpeed = false;
     }
 
     private SdlManager _sdl;
@@ -191,4 +221,7 @@ public class DisplayEnergy {
     private boolean displayFuel;
     private double targetTemp = 24;
     private double speed;
+    private boolean first;
+    private double fuel;
+    private double startingFuel;
 }

@@ -52,9 +52,9 @@ import java.util.Vector;
 
 public class SdlService extends Service {
 
-	private static final String TAG 					= "SDL Service";
+	private static final String TAG 					= "Econscious";
 
-	private static final String APP_NAME 				= "Hello";
+	private static final String APP_NAME 				= "Econscious";
 	private static final String APP_ID 					= "8678309";
 
 	private static final String ICON_FILENAME 			= "hello_sdl_icon.png";
@@ -247,7 +247,7 @@ public class SdlService extends Service {
 		// some voice commands
 		List<String> voice2 = Collections.singletonList("Cell two");
 
-		MenuCell mainCell1 = new MenuCell("Test Cell 1 (speak)", livio, null, new MenuSelectionListener() {
+		MenuCell mainCell1 = new MenuCell("AC recommendation", livio, null, new MenuSelectionListener() {
 			@Override
 			public void onTriggered(TriggerSource trigger) {
 				Log.i(TAG, "Test cell 1 triggered. Source: "+ trigger.toString());
@@ -260,7 +260,7 @@ public class SdlService extends Service {
 			@Override
 			public void onTriggered(TriggerSource trigger) {
 				Log.i(TAG, "Test cell 2 triggered. Source: "+ trigger.toString());
-				stopTest();
+				de.stop();
 				de.display1();
 			}
 		});
