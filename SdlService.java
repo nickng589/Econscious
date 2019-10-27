@@ -24,21 +24,16 @@ import com.smartdevicelink.managers.screen.menu.VoiceCommand;
 import com.smartdevicelink.managers.screen.menu.VoiceCommandSelectionListener;
 import com.smartdevicelink.protocol.enums.FunctionID;
 import com.smartdevicelink.proxy.RPCNotification;
-import com.smartdevicelink.proxy.RPCResponse;
 import com.smartdevicelink.proxy.TTSChunkFactory;
 import com.smartdevicelink.proxy.rpc.Alert;
 import com.smartdevicelink.proxy.rpc.OnHMIStatus;
-import com.smartdevicelink.proxy.rpc.OnVehicleData;
 import com.smartdevicelink.proxy.rpc.Speak;
-import com.smartdevicelink.proxy.rpc.SubscribeVehicleData;
 import com.smartdevicelink.proxy.rpc.enums.AppHMIType;
 import com.smartdevicelink.proxy.rpc.enums.FileType;
 import com.smartdevicelink.proxy.rpc.enums.HMILevel;
 import com.smartdevicelink.proxy.rpc.enums.InteractionMode;
-import com.smartdevicelink.proxy.rpc.enums.Result;
 import com.smartdevicelink.proxy.rpc.enums.TriggerSource;
 import com.smartdevicelink.proxy.rpc.listeners.OnRPCNotificationListener;
-import com.smartdevicelink.proxy.rpc.listeners.OnRPCResponseListener;
 import com.smartdevicelink.transport.BaseTransportConfig;
 import com.smartdevicelink.transport.MultiplexTransportConfig;
 import com.smartdevicelink.transport.TCPTransportConfig;
@@ -53,14 +48,13 @@ import java.util.Vector;
 public class SdlService extends Service {
 
 	private static final String TAG 					= "SDL Service";
-
-	private static final String APP_NAME 				= "Hello";
+	private static final String APP_NAME 				= "Hello Porkabellos";
 	private static final String APP_ID 					= "8678309";
 
 	private static final String ICON_FILENAME 			= "hello_sdl_icon.png";
 	private static final String SDL_IMAGE_FILENAME  	= "sdl_full_image.png";
 
-	private static final String WELCOME_SHOW 			= "Welcome to HelloSDL";
+	private static final String WELCOME_SHOW 			= "Welcome to Porkese";
 	private static final String WELCOME_SPEAK 			= "Welcome to Hello S D L";
 
 	private static final String TEST_COMMAND_NAME 		= "Test Command";
@@ -71,7 +65,7 @@ public class SdlService extends Service {
 	// The default port is 12345
 	// The IP is of the machine that is running SDL Core
 	private static final int TCP_PORT = 12345;
-	private static final String DEV_MACHINE_IP_ADDRESS = "10.142.157.16";
+	private static final String DEV_MACHINE_IP_ADDRESS = "10.142.96.157";
 
 	// variable to create and call functions of the SyncProxy
 	private SdlManager sdlManager = null;
@@ -179,9 +173,6 @@ public class SdlService extends Service {
 								performWelcomeSpeak();
 								performWelcomeShow();
 								preloadChoices();
-								DisplayEnergy sdl = new DisplayEnergy(sdlManager);
-								sdl.display();
-								//test();
 							}
 						}
 					});
@@ -246,11 +237,14 @@ public class SdlService extends Service {
 		// some voice commands
 		List<String> voice2 = Collections.singletonList("Cell two");
 
-		MenuCell mainCell1 = new MenuCell("Test Cell 1 (speak)", livio, null, new MenuSelectionListener() {
+		MenuCell mainCell1 = new MenuCell("Trip Stats", livio, null, new MenuSelectionListener() {
 			@Override
 			public void onTriggered(TriggerSource trigger) {
-				Log.i(TAG, "Test cell 1 triggered. Source: "+ trigger.toString());
-				showTest();
+				Log.i(TAG, "Fuel consumption so far: "+ trigger.toString());
+				sdlManager.getScreenManager().beginTransaction();
+				sdlManager.getScreenManager().setTextField1("Fuel consumption so far:");
+				sdlManager.getScreenManager().setTextField2("");
+				sdlManager.getScreenManager().commit(null);
 			}
 		});
 
@@ -333,10 +327,10 @@ public class SdlService extends Service {
 	 */
 	private void showTest(){
 		sdlManager.getScreenManager().beginTransaction();
-		sdlManager.getScreenManager().setTextField1("Test Cell 1 has been selected");
-		sdlManager.getScreenManager().setTextField2("");
-		sdlManager.getScreenManager().setTextField3("HELLO");
+        sdlManager.getScreenManager().setTextField1("Test Cell 1 has been selected");
+        sdlManager.getScreenManager().setTextField2("");
 		sdlManager.getScreenManager().commit(null);
+
 		sdlManager.sendRPC(new Speak(TTSChunkFactory.createSimpleTTSChunks(TEST_COMMAND_NAME)));
 	}
 
@@ -372,36 +366,5 @@ public class SdlService extends Service {
 			});
 			sdlManager.getScreenManager().presentChoiceSet(choiceSet, InteractionMode.MANUAL_ONLY);
 		}
-	}
-
-	private void test(){
-		sdlManager.addOnRPCNotificationListener(FunctionID.ON_VEHICLE_DATA, new OnRPCNotificationListener() {
-			@Override
-			public void onNotified(RPCNotification notification) {
-				OnVehicleData onVehicleDataNotification = (OnVehicleData) notification;
-				if (onVehicleDataNotification.getDriverBraking() != null) {
-					sdlManager.getScreenManager().setTextField2(onVehicleDataNotification.getDriverBraking().toString()+ "*");
-				}
-			}
-		});
-		SubscribeVehicleData subscribeRequest = new SubscribeVehicleData();
-		subscribeRequest.setDriverBraking(true);
-		subscribeRequest.setOnRPCResponseListener(new OnRPCResponseListener() {
-			@Override
-			public void onResponse(int correlationId, RPCResponse response) {
-				if(response.getSuccess()){
-					Log.i("SdlService", "Successfully subscribed to vehicle data.");
-				}else{
-					Log.i("SdlService", "Request to subscribe to vehicle data was rejected.");
-				}
-			}
-
-			@Override
-			public void onError(int correlationId, Result resultCode, String info){
-				Log.e(TAG, "onError: "+ resultCode+ " | Info: "+ info );
-			}
-		});
-		sdlManager.sendRPC(subscribeRequest);
-		sdlManager.getScreenManager().commit(null);
 	}
 }
