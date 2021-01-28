@@ -5,4 +5,3 @@ Currently, we have three main ways of encouraging energy efficiency.  The first 
 
 Download zip file and Android studio and vehicle emulator and run hello_sdl_android to see product
 
-*Base code provided by ford and smart device link.*
